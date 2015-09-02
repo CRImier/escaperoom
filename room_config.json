@@ -1,0 +1,64 @@
+{
+    "sensors":
+        [
+         {"name":"heat_sensor_1",
+          "desc":"Heat sensor in the beginning",
+          "class":"Modbus.TemperatureSensor",
+          "args":[],
+          "kwargs":
+           {
+            "modbus_id":11, 
+            "temperature_register":3,
+            "coefficient":1
+           }
+         },
+         {"name":"rfid_sensor_1",
+          "desc":"RFID sensor where figures need to be inserted into slots",
+          "class":"Modbus.RFIDSensor",
+          "args":[],
+          "kwargs":
+           {
+            "modbus_id":12, 
+            "reader_count":3,
+            "presence_register":3,
+            "reader_registers":[4, 5, 6]
+           }
+         },
+         {"name":"knob_panel_1",
+          "desc":"Knob panel that opens the shaft door",
+          "class":"Modbus.KnobPanel",
+          "args":[],
+          "kwargs":
+           {
+            "modbus_id":13, 
+            "knob_count":3,
+            "knob_registers":[3, 4, 5]
+           }
+         },
+         {"name":"door_sensor_2",
+          "desc":"Game exit door",
+          "class":"Modbus.DoorSensor",
+          "args":[],
+          "kwargs":
+           {
+            "modbus_id":14, 
+            "door_register":3,
+            "bit":0
+           }
+         }
+       ],         
+    "actuators":
+       [
+         {"name":"door_1",
+          "desc":"First door relay",
+          "class":"Actuators.DoorRelay",
+          "args":[],
+          "kwargs":
+           {
+            "modbus_id":11, 
+            "register":3,
+            "bit":0
+           }
+         },
+       ]
+}

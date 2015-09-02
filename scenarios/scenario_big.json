@@ -1,0 +1,145 @@
+{"steps":
+    {
+        "name":"step_1",
+        "description":"When a heat sensor is heated up, the door shall open",
+        "steps_that_enable":['start'],
+        "hw_conditions":
+        [
+            {'sensor':'heat_sensor_1', 'method':'compare_temperature', 'kwargs':{'temperature':45, 'margin':2}}
+        ],
+        "hw_triggers":
+        [
+            {'actuator':'door_1', 'method':'unlock'}
+        ]
+    },
+    {
+        "name":"step_2",
+        "description":"When figures get inserted into slots, a mannequin door opens",
+        "steps_that_enable":['step_3'],
+        "hw_conditions":
+        [
+            {'sensor':'rfid_sensor_1', 'method':'compare_ids', 'args':['32AF', '45D1', '3F34']}
+        ],
+        "hw_triggers":
+        [
+            {'actuator':'door_2', 'method':'unlock'}
+        ]
+    },
+    {
+        "name":"step_3",
+        "description":"When knobs are turned the right way, the door shall open",
+        "steps_that_enable":['step_1'],
+        "hw_conditions":
+        [
+            {'sensor':'knob_panel_1', 'method':'compare_knobs', 'args':[100, 500, 900], 'kwargs':{'margin':50}}
+        ],
+        "hw_triggers":
+        [
+            {'actuator':'door_3', 'method':'unlock'}
+        ]
+    },
+    {
+        "name":"step_4",
+        "description":"When enough blood is poured into containers, the door shall open",
+        "steps_that_enable":['step_6'],
+        "hw_conditions":
+        [
+            {'sensor':'weight_sensor_1', 'method':'compare_weight', 'kwargs':{'weight':1000, 'margin':50}}
+        ],
+        "hw_triggers":
+        [
+            {'actuator':'door_4', 'method':'unlock'}
+        ]
+    },
+    {
+        "name":"step_5",
+        "description":"When a door is opened, the sound plays",
+        "steps_that_enable":['step_4'],
+        "hw_conditions":
+        [
+            {'sensor':'door_sensor_1', 'method':'compare_state', 'args':[false]}
+        ],
+        "env_triggers":
+        [
+            {'action':'sound', 'method'='play_from_library', 'args':['shooting_sound.mp3']}
+        ]
+    },
+    {
+        "name":"step_6",
+        "description":"When 3 points on a mannequin are shot, the door opens",
+        "steps_that_enable":['step_2'],
+        "hw_conditions":
+        [
+            {'sensor':'shot_sensor_1', 'method':'compare_state', 'args':[true, true, true]}
+        ],
+        "hw_triggers":
+        [
+            {'actuator':'door_5', 'method':'unlock'}
+        ]
+    },
+    {
+        "name":"step_7",
+        "description":"When figures are put onto correct places, the door opens",
+        "steps_that_enable":['step_4', 'step_10'],
+        "hw_conditions":
+        [
+            {'sensor':'rfid_sensor_2', 'method':'compare_ids', 'args':['32AF', '45D1', '3F34']}
+        ],
+        "hw_triggers":
+        [
+            {'actuator':'door_6', 'method':'unlock'}
+        ]
+    },
+    {
+        "name":"step_8",
+        "description":"When a coin is put into a coin feeder, the door opens",
+        "steps_that_enable":['step_7'],
+        "hw_conditions":
+        [
+            {'sensor':'coin_sensor_1', 'method':'coin_detected'}
+        ],
+        "hw_triggers":
+        [
+            {'actuator':'door_7', 'method':'unlock'}
+        ]
+    },
+    {
+        "name":"step_9",
+        "description":"When the main door is opened, the game ends",
+        "steps_that_enable":['step_8'],
+        "hw_conditions":
+        [
+            {'sensor':'door_sensor_2', 'method':'door_open'}
+        ],
+        "env_triggers":
+        [
+            {'action':'game', 'method':'end', 'args':'finished'}
+        ]
+    },
+    {
+        "name":"step_10",
+        "description":"When plastic balls are detected in pipe, the door opens",
+        "steps_that_enable":['step_6'],
+        "hw_conditions":
+        [
+            {'sensor':'optical_sensor_1', 'method':'presence_detected'}
+        ],
+        "hw_triggers":
+        [
+            {'actuator':'door_8', 'method':'unlock'}
+        ]
+    },
+    {
+        "name":"step_11",
+        "description":"When a laser beam is crossed, time is decreased by 5 minutes",
+        "steps_that_enable":['step_1'],
+        "hw_conditions":
+        [
+            {'sensor':'laser_sensor_1', 'method':'beam_crossed'}
+        ],
+        "env_triggers":
+        [
+            {'action':'game', 'method':'decrease_time', 'args':'300'}
+        ]
+    }
+}

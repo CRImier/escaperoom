@@ -11,7 +11,7 @@ MFRC522 *readers[num_readers];
 
 //Array with configs for each reader. 
 //Structure: {RST_PIN, SS_PIN, MODBUS_REG }
-int reader_settings[num_readers][3] = {{9, 10, 3},
+int reader_settings[num_readers][3] = {{A0, A1, 3},
                                        {2, 3, 4},
                                        {4, 5, 5}};
 
