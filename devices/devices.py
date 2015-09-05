@@ -127,12 +127,12 @@ class DoorRelay(ModbusDevice):
         self.register = register
         self.bit = bit
 
-    def open(self):
+    def unlock(self):
         data = self.request(self.register)
         data = data | (1 << self.bit) 
         self.write(self.register, data)
 
-    def close(self):
+    def lock(self):
         data = self.request(self.register)
         data = data & ~(1 << self.bit) 
         self.write(self.register, data)
