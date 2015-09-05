@@ -1,12 +1,12 @@
 #include <ModbusRtu.h>
-#define ID   12
+#define ID   14
 Modbus slave(ID, 0, 10);
 
 
-const int analog_ports[] = { A0 };
+const int digital_ports[] = { 2 };
 
-#define num_analog sizeof(analog_ports)/sizeof(int)
-#define reg_count 3+num_analog+3
+#define num_digital sizeof(digital_ports)/sizeof(int)
+#define reg_count 6
 
 uint16_t au16data[reg_count];
 
@@ -21,11 +21,10 @@ void setup()
 
 void loop() {
   slave.poll( au16data, reg_count );
-  au16data[0] = 0;
   digitalWrite( relay_pin, bitRead( au16data[1], 0 ));
-  for(int x = 0; x < num_analog; x++)
+  for(int x = 0; x < num_digital; x++)
   {
-    au16data[3+x] = analogRead(analog_ports[x]);
+    bitWrite(au16data[0], x, digitalRead(digital_ports[x]));
   }
   au16data[reg_count-3] = slave.getInCnt();
   au16data[reg_count-2] = slave.getOutCnt();

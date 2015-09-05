@@ -12,8 +12,8 @@ MFRC522 *readers[num_readers];
 //Array with configs for each reader. 
 //Structure: {RST_PIN, SS_PIN, MODBUS_REG }
 int reader_settings[num_readers][3] = {{A0, A1, 3},
-                                       {2, 3, 4},
-                                       {4, 5, 5}};
+                                       {A2, A3, 4},
+                                       {A5, A4, 5}};
 
 //Modbus register array.
 uint16_t au16data[9] = 
@@ -77,6 +77,8 @@ void loop() {
   au16data[6] = slave.getInCnt();
   au16data[7] = slave.getOutCnt();
   au16data[8] = slave.getErrCnt();
+  digitalWrite(13, HIGH);
+  digitalWrite(13, HIGH);
 }
 
 

@@ -7,20 +7,21 @@
           "args":[],
           "kwargs":
            {
-            "modbus_id":13,
+            "modbus_id":11, 
             "temperature_register":3,
             "coefficient":1
            }
          },
-         {"name":"pressure_sensor_1",
-          "desc":"Pressure sensor for which water has to be poured into a jug",
-          "class":"Modbus.PressureSensor",
+         {"name":"rfid_sensor_1",
+          "desc":"RFID sensor where figures need to be inserted into slots",
+          "class":"Modbus.RFIDSensor",
           "args":[],
           "kwargs":
            {
             "modbus_id":12, 
-            "pressure_register":3,
-            "coefficient":1
+            "reader_count":3,
+            "presence_register":3,
+            "reader_registers":[4, 5, 6]
            }
          },
          {"name":"knob_panel_1",
@@ -41,7 +42,7 @@
           "kwargs":
            {
             "modbus_id":14, 
-            "door_register":0,
+            "door_register":3,
             "bit":0
            }
          }

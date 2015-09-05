@@ -1,54 +1,54 @@
-{"steps":
+[
     {
         "name":"step_1",
         "description":"When a heat sensor is heated up, the door shall open",
-        "steps_that_enable":['start'],
+        "steps_that_enable":["start"],
         "hw_conditions":
         [
-            {'sensor':'heat_sensor_1', 'method':'compare_temperature', 'kwargs':{'temperature':45, 'margin':2}}
+            {"sensor":"heat_sensor_1", "method":"compare_temperature", "kwargs":{"temperature":500, "margin":20}}
         ],
         "hw_triggers":
         [
-            {'actuator':'door_1', 'method':'unlock'}
+            {"actuator":"door_1", "method":"unlock"}
         ]
     },
     {
         "name":"step_2",
-        "description":"When figures get inserted into slots, a mannequin door opens",
-        "steps_that_enable":['step_3'],
+        "description":"When a weight is put on the pressure sensor, the door shall open",
+        "steps_that_enable":["step_1"],
         "hw_conditions":
         [
-            {'sensor':'rfid_sensor_1', 'method':'compare_ids', 'args':['32AF', '45D1', '3F34']}
+            {"sensor":"pressure_sensor_1", "method":"compare_pressure", "kwargs":{"pressure":1000, "margin":30}}
         ],
         "hw_triggers":
         [
-            {'actuator':'door_2', 'method':'unlock'}
+            {"actuator":"door_2", "method":"unlock"}
         ]
     },
     {
         "name":"step_3",
         "description":"When knobs are turned the right way, the door shall open",
-        "steps_that_enable":['step_1'],
+        "steps_that_enable":["step_2"],
         "hw_conditions":
         [
-            {'sensor':'knob_panel_1', 'method':'compare_knobs', 'args':[100, 500, 900], 'kwargs':{'margin':50}}
+            {"sensor":"knob_panel_1", "method":"compare_knobs", "args":[100, 500, 900], "kwargs":{"margin":50}}
         ],
         "hw_triggers":
         [
-            {'actuator':'door_3', 'method':'unlock'}
+            {"actuator":"door_3", "method":"unlock"}
         ]
     },
     {
         "name":"step_4",
         "description":"When the main door is opened, the game ends",
-        "steps_that_enable":['step_3'],
+        "steps_that_enable":["step_3"],
         "hw_conditions":
         [
-            {'sensor':'door_sensor_2', 'method':'door_opened'}
+            {"sensor":"door_sensor_2", "method":"door_opened"}
         ],
         "env_triggers":
         [
-            {'action':'game', 'method':'end', 'args':'finished'}
+            {"action":"game", "method":"end", "args":"finished"}
         ]
     }
-}
+]

@@ -1,6 +1,6 @@
 from operator import attrgetter
 
-object_storage = [] #TODO
+from devices import Devices
 
 class RoomManager():
     config = {}
@@ -11,9 +11,9 @@ class RoomManager():
         self.config = config
 
     def init_devices(self):
-        for sensor in config['sensors']
+        for sensor in self.config['sensors']:
             sensor_name = sensor['name']
-            sensor_class = attgetter(sensor['class'])(objects) #TODO
+            sensor_class = attrgetter(sensor['class'])(Devices)
             sensor_object = sensor_class(*sensor['args'], **sensor['kwargs'])
             self.descriptions[sensor_name] = sensor['desc']
             self.devices[sensor_name] = sensor_object
