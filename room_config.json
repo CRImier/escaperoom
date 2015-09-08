@@ -13,7 +13,7 @@
            }
          },
          {"name":"pressure_sensor_1",
-          "desc":"Pressure sensor for which water has to be poured into a jug",
+          "desc":"Pressure sensor for which water has to be poured into a cup",
           "class":"Modbus.PressureSensor",
           "args":[],
           "kwargs":
@@ -50,12 +50,27 @@
        [
          {"name":"door_1",
           "desc":"First door relay",
-          "class":"Actuators.DoorRelay",
+          "class":"Modbus.DoorRelay",
           "args":[],
           "kwargs":
            {
-            "modbus_id":11, 
-            "register":3,
+            "modbus_id":12, 
+            "init_locked":true,
+            "lock_invert":true,
+            "register":1,
+            "bit":0
+           }
+         },
+         {"name":"door_2",
+          "desc":"Second door relay",
+          "class":"Modbus.DoorRelay",
+          "args":[],
+          "kwargs":
+           {
+            "modbus_id":14, 
+            "init_locked":true,
+            "lock_invert":true,
+            "register":1,
             "bit":0
            }
          }

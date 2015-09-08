@@ -125,18 +125,27 @@ class DoorSensor(ModbusDevice):
 
 class DoorRelay(ModbusDevice):
 
-    def __init__(self, modbus_id=1, register=0, bit=0):
+    lock = lambda: None
+    unlock = lambda: None
+
+    def __init__(self, modbus_id=1, init_locked=True, lock_invert=False, register=0, bit=0):
         ModbusDevice.__init__(self) 
-        self.modbus_id=modbus_id
+        self.modbus_id = modbus_id
         self.register = register
         self.bit = bit
+        if lock_invert:
+            self.lock, self.unlock = self.set_false, self.set_true
+        else:
+            self.lock, self.unlock = self.set_true, self.set_false
+        if init_locked:
+            self.lock()
 
-    def unlock(self):
+    def set_true(self):
         data = self.request(self.register)
         data = data | (1 << self.bit) 
         self.write(self.register, data)
-
-    def lock(self):
+        
+    def set_false(self):
         data = self.request(self.register)
         data = data & ~(1 << self.bit) 
         self.write(self.register, data)

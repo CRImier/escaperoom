@@ -10,7 +10,7 @@ def init_client():
     global client
     if client:
         return
-    client = ModbusClient(method='rtu', port='/dev/ttyUSB0', stopbits = 1, bytesize = 8, parity = 'N', baudrate= 115200, timeout=1)
+    client = ModbusClient(method='rtu', port='/dev/ttyUSB0', stopbits = 1, bytesize = 8, parity = 'N', baudrate= 115200, timeout=0.1)
     client.connect()
 
 class ModbusDevice():
@@ -36,5 +36,5 @@ class ModbusDevice():
         logging.info("Got the response successfully.")
         return response
 
-    def write(register, data):
+    def write(self, register, data):
         return self.client.write_register(register, data, unit=self.modbus_id)

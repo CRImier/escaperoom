@@ -116,7 +116,7 @@ class StepManager():
     def execute_triggers(self, step):
         for hw_trigger in step.hw_triggers:
             print(hw_trigger)
-            #self.room_manager.execute_hw_trigger(hw_trigger)
+            self.room.execute_hw_trigger(hw_trigger)
         for env_trigger in step.env_triggers:
             print(env_trigger)
             #self.room_manager.execute_env_trigger(env_trigger)
