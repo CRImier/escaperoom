@@ -1,5 +1,5 @@
 #include <ModbusRtu.h>
-#define ID   12
+#define ID   11
 Modbus slave(ID, 0, 10);
 
 

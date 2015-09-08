@@ -6,7 +6,7 @@ import pdb
 import sys
 import logging
 sys.excepthook = lambda *args: pdb.pm()
-logging.basicConfig(stream = sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream = sys.stdout, level=logging.INFO)
 
 logging.info("Importing modules")
 
@@ -30,11 +30,9 @@ room_manager.init_devices()
 
 step_manager = StepManager(scenario, room_manager)
 
-step_manager.devices = room_manager.devices #step manager needs access to devices room manager has accessible TODO: make it better?
-
 rpc_api = RPCApi(rpc_config, step_manager, room_manager)
 
 while True:
     step_manager.poll()
     rpc_api.poll()
-    sleep(1)
+    sleep(0.1)

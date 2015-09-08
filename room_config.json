@@ -7,7 +7,7 @@
           "args":[],
           "kwargs":
            {
-            "modbus_id":13,
+            "modbus_id":11,
             "temperature_register":3,
             "coefficient":1
            }

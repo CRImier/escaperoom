@@ -1,5 +1,8 @@
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from time import sleep
+import logging
+import sys
+logging.basicConfig(stream = sys.stdout, level=logging.INFO)
 
 client = None
 
@@ -16,7 +19,22 @@ class ModbusDevice():
         self.client = client
 
     def request(self, register):
-        return self.client.read_holding_registers(register, 1, unit=self.modbus_id).getRegister(0)
+        counter = 0
+        response = None
+        while response == None and counter <= 3:
+            response = self.client.read_holding_registers(register, 1, unit=self.modbus_id)
+            if response == None:
+                logging.warning("Try {} - didn't get any response from a slave device, retrying...".format(counter))
+                counter += 1
+                continue
+            print response
+            response = response.getRegister(0)
+            if response == None:
+                logging.warning("Try {} - didn't get any response from a slave device, retrying...".format(counter))
+                counter += 1
+            print response
+        logging.info("Got the response successfully.")
+        return response
 
     def write(register, data):
         return self.client.write_register(register, data, unit=self.modbus_id)

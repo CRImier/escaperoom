@@ -1,5 +1,7 @@
 from modbus_dev import ModbusDevice
 
+import logging
+
 import pdb
 
 class KnobPanel(ModbusDevice):
@@ -12,19 +14,21 @@ class KnobPanel(ModbusDevice):
 
     def get_knob_value(self, knob_register):
         raw_data = self.request(knob_register)
+        return raw_data
 
     def get_knob_values(self):
         values = []
         for knob_index in range(self.knob_count):
-            values.append(self.get_knob_values(self.knob_registers[knob_index]))
+            values.append(self.get_knob_value(self.knob_registers[knob_index]))
         return values
 
     def compare_knobs(self, *args, **kwargs):
         margin = kwargs['margin']
         truth_table = []
         knob_values = self.get_knob_values()
+        print knob_values
         for index, value in enumerate(args):
-            truth_table.append(value < knob_values[index] + margin and value > knob_values[index] - margin)
+            truth_table.append(value < (knob_values[index] + margin) and value > (knob_values[index] - margin))
         return all(truth_table)
 
 
@@ -48,7 +52,7 @@ class TemperatureSensor(ModbusDevice):
 
     def compare_temperature(self, temperature=0, margin=5):
         current_temperature = self.get_temperature()
-        return (current_temperature < temperature + margin and current_temperature > temperature - margin)
+        return (current_temperature < (temperature + margin) and current_temperature > (temperature - margin))
 
 
 class PressureSensor(ModbusDevice):
