@@ -144,6 +144,26 @@ class StepManager():
             if step.name == step_name:
                 return step
 
+    def api_get_steps(self):
+        response = []
+        for step in self.steps:
+            step_description = {}
+            attrs = ["name", "description", "steps_that_enable"]
+            for attr in attrs:
+                step_description[attr] = getattr(step, attr)
+            response.append(step_description)
+        return response
+
+    def api_get_active_steps(self):
+        response = []
+        for step in self.enabled_steps:
+            step_description = {}
+            attrs = ["name", "description", "steps_that_enable"]
+            for attr in attrs:
+                step_description[attr] = getattr(step, attr)
+            response.append(step_description)
+        return response
+
     def poll(self):
         logging.debug("Step manager - polling...")
         for step in self.enabled_steps:
@@ -152,3 +172,4 @@ class StepManager():
                 self.execute_triggers(step)
                 self.finish_step(step)
                 self.update_enabled_steps()
+

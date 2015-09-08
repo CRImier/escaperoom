@@ -11,12 +11,16 @@ class RPCApi():
         self.register_functions()
         
     def register_functions(self):
-        for function_name in self.config['step_manager_functions']:
+        for description in self.config['step_manager_functions']:
+            function_name = description["name"]
+            function_alias = description["alias"] if "alias" in description.keys() else function_name
             function = getattr(self.step_manager, function_name)
-            self.server.register_function(function)
-        for function_name in self.config['room_manager_functions']:
+            self.server.register_function(function, function_alias)
+        for description in self.config['room_manager_functions']:
+            function_name = description["name"]
+            function_alias = description["alias"] if "alias" in description.keys() else function_name
             function = getattr(self.room_manager, function_name)
-            self.server.register_function(function)
+            self.server.register_function(function, function_alias)
 
     def poll(self):
-        self.server.handle_request
+        self.server.handle_request()

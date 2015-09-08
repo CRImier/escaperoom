@@ -31,7 +31,7 @@ class RoomManager():
         return self.descriptions[device_name]
     
     def get_descriptions(self, *names):
-        return (get_descriptions(name) for name in names)
+        return [self.get_description(name) for name in names]
 
     def execute_hw_trigger(self, trigger):
         actuator_name = trigger["actuator"]
