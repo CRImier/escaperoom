@@ -24,16 +24,14 @@ class ModbusDevice():
         while response == None and counter <= 3:
             response = self.client.read_holding_registers(register, 1, unit=self.modbus_id)
             if response == None:
-                logging.warning("Try {} - didn't get any response from a slave device, retrying...".format(counter))
+                logging.warning("Try {} - didn't get any response from a slave device with ID {}, retrying...".format(counter, self.modbus_id))
                 counter += 1
                 continue
-            print response
             response = response.getRegister(0)
             if response == None:
-                logging.warning("Try {} - didn't get any response from a slave device, retrying...".format(counter))
+                logging.warning("Try {} - didn't get any response from a slave device with ID {}, retrying...".format(counter, self.modbus_id))
                 counter += 1
-            print response
-        logging.info("Got the response successfully.")
+        logging.debug("Got the response successfully.")
         return response
 
     def write(self, register, data):

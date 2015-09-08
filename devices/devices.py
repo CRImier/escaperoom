@@ -26,7 +26,7 @@ class KnobPanel(ModbusDevice):
         margin = kwargs['margin']
         truth_table = []
         knob_values = self.get_knob_values()
-        print knob_values
+        print("{} - {}".format(str(knob_values), str(args)))
         for index, value in enumerate(args):
             truth_table.append(value < (knob_values[index] + margin) and value > (knob_values[index] - margin))
         return all(truth_table)

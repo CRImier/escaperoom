@@ -130,7 +130,7 @@ class StepManager():
         return self.room.devices[name]
 
     def process_hardware_condition(self, condition):
-        logging.info("Processing condition {}".format(condition))
+        logging.debug("Processing condition {}".format(condition))
         sensor_name = condition['sensor']
         method_name = condition['method']
         sensor = self.get_sensor_by_name(sensor_name)
