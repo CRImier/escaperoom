@@ -43,7 +43,7 @@ def init_managers():
     room_manager = RoomManager(room_config)
     room_manager.init_devices()
     step_manager = StepManager(scenario, room_manager)
-    rpc_api = RPCApi(rpc_config, step_manager, room_manager)
+    rpc_api = RPCApi(rpc_config, step_manager=step_manager, room_manager=room_manager)
     game_manager = GameManager()
     game = game_manager.start_game(game_length=60*60)
 

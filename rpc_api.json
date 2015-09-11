@@ -2,12 +2,12 @@
     "host":"localhost",
     "port":8080,
     "timeout":0.1,
-    "step_manager_functions":
+    "step_manager":
     [
       {"name":"api_get_active_steps", "alias":"get_active_steps"},
       {"name":"api_get_steps", "alias":"get_steps"}
     ],
-    "room_manager_functions":
+    "room_manager":
     [
       {"name":"get_descriptions", "alias":"get_sensor_descriptions"}
     ]
