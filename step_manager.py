@@ -173,3 +173,7 @@ class StepManager():
                 self.finish_step(step)
                 self.update_enabled_steps()
 
+    def stress_test(self):
+        logging.debug("Step manager - stress-testing...")
+        for step in self.steps:
+            step.complete_conditions_met(self.process_condition)

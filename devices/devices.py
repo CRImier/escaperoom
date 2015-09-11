@@ -11,6 +11,7 @@ class KnobPanel(ModbusDevice):
         self.modbus_id = modbus_id
         self.knob_count = knob_count
         self.knob_registers = knob_registers
+        self.test()
 
     def get_knob_value(self, knob_register):
         raw_data = self.request(knob_register)
@@ -39,6 +40,7 @@ class TemperatureSensor(ModbusDevice):
         self.modbus_id = modbus_id
         self.temperature_register = temperature_register
         self.coefficient = coefficient
+        self.test()
 
     def get_raw_data(self):
         raw_data = self.request(self.temperature_register)
@@ -62,6 +64,7 @@ class PressureSensor(ModbusDevice):
         self.modbus_id = modbus_id
         self.pressure_register = pressure_register
         self.coefficient = coefficient
+        self.test()
 
     def get_raw_data(self):
         raw_data = self.request(self.pressure_register)
@@ -85,6 +88,7 @@ class RFIDSensor(ModbusDevice):
         self.reader_count = reader_count
         self.presence_register = presence_register
         self.reader_registers = reader_registers
+        self.test()
         #Insert check for len(reader_registers) = reader_count
         
     def get_presence_bits(self):
@@ -112,6 +116,7 @@ class DoorSensor(ModbusDevice):
         self.modbus_id = modbus_id
         self.door_register = door_register
         self.bit = bit
+        self.test()
 
     def get_door_register(self):
         raw_data = self.request(self.door_register)
@@ -133,6 +138,7 @@ class DoorRelay(ModbusDevice):
         self.modbus_id = modbus_id
         self.register = register
         self.bit = bit
+        self.test()
         if lock_invert:
             self.lock, self.unlock = self.set_false, self.set_true
         else:

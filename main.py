@@ -51,9 +51,21 @@ def init():
     read_configs()
     init_managers()
 
+def test():
+    args = (0L, 0L, {})
+    try:
+        while True:
+            args = room_manager.stress_test(*args)
+    except KeyboardInterrupt:
+        print("Interrupting test - {} failed attempts out of {}".format(args[1], args[0]))
+        print(args[2])
+        sys.exit(0)
+
 if __name__ == "__main__":
     init()
-    while game.running:
-        step_manager.poll()
-        rpc_api.poll()
-        sleep(0.1)
+    test()
+    #while game.running:
+        #step_manager.stress_test()
+        #step_manager.poll()
+        #rpc_api.poll()
+        #sleep(0.1)

@@ -27,6 +27,18 @@ class RoomManager():
             self.descriptions[actuator_name] = actuator['desc']
             self.devices[actuator_name] = actuator_object
 
+    def stress_test(self, total_count=0, bad_count=0, error_count={}):
+        for device in self.devices.values():
+            if device.modbus_id not in error_count.keys():
+                error_count[device.modbus_id] = 0
+            total_count += 1
+            result = device.test()
+            if not result[0]:
+                bad_count += 1
+                error_count[result[1]] += 1
+        return total_count, bad_count, error_count
+            
+
     def get_description(self, device_name):
         return self.descriptions[device_name]
     
