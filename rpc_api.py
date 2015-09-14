@@ -2,11 +2,18 @@ from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 import logging
 
 class RPCApi():
-    def __init__(self, config, **kwargs):
+    server = None
+    def __init__(self):
+        pass
+
+    def init_api(self, config, **kwargs):
         self.config = config
         self.objects = kwargs #We pass object_name:object pairs with all the objects whose functions have to be registered.
-        self.server = SimpleJSONRPCServer((self.config['host'], self.config['port']))
+        if not self.server:
+            self.server = SimpleJSONRPCServer((self.config['host'], self.config['port']))
+        #Doesn't support changing server's host/port on the fly, but can be easily added if needed
         self.server.timeout = self.config['timeout']
+        #TODO: unregister all the functions maybe? Is there even such an action? Would it be necessary?
         self.register_functions()
         
     def register_functions(self):
@@ -19,4 +26,5 @@ class RPCApi():
                 self.server.register_function(function, function_alias)
 
     def poll(self):
-        self.server.handle_request()
+        logging.debug("RPC API: polling...")
+        self.server.handle_request() #TODO: remake so that it fullfills all the requests available?

@@ -5,10 +5,18 @@
     "step_manager":
     [
       {"name":"api_get_active_steps", "alias":"get_active_steps"},
+      {"name":"api_finish_step_by_name", "alias":"finish_step"},
       {"name":"api_get_steps", "alias":"get_steps"}
+    ],
+    "game_manager":
+    [
+      {"name":"api_start_game", "alias":"start_game"},
+      {"name":"api_stop_game", "alias":"stop_game"}
     ],
     "room_manager":
     [
-      {"name":"get_descriptions", "alias":"get_sensor_descriptions"}
+      {"name":"api_get_device_descriptions", "alias":"get_devices"},
+      {"name":"api_test_devices", "alias":"test_devices"},
+      {"name":"api_stress_test", "alias":"stress_test"}
     ]
 }

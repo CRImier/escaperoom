@@ -60,24 +60,26 @@ class Step():
         pass            
     
 class StepManager():
-    config = {}
-    steps = []
-    enabled_steps = []
-    devices = {}
-    finished_steps = [] #Check if needed
 
-    def __init__(self, config, room_manager):
-        self.room = room_manager
-        self.devices = room_manager.devices
+    def __init__(self):
+        pass
+
+    def init_steps(self, config, room_manager, game_manager):
         self.config = config
+        self.steps = []
+        self.enabled_steps = []
+        self.finished_steps = [] #Check if needed
+        self.room = room_manager
+        self.game = game_manager
         for step_config in self.config:
             step = Step(step_config)
             if step.enable_on_start == True:
                 logging.debug("Enabling step...")
                 self.enable_step(step)
             self.steps.append(step)
+
+    def game_started(self):
         self.update_enabled_steps()        
-        #Maybe exec init triggers?
 
     def update_enabled_steps(self):
         for step in self.steps:
@@ -110,16 +112,20 @@ class StepManager():
         step.disable()
         self.finished_steps.append(step)
 
+    def api_finish_step_by_name(self, name):
+        step = self.get_step_by_name(name)
+        return self.finish_step(step)
+
     def enable_step(self, step):
         step.enable()
 
     def execute_triggers(self, step):
         for hw_trigger in step.hw_triggers:
-            print(hw_trigger)
+            logging.debug("Executing hardware trigger: {}".format(hw_trigger))
             self.room.execute_hw_trigger(hw_trigger)
         for env_trigger in step.env_triggers:
-            print(env_trigger)
-            #self.room_manager.execute_env_trigger(env_trigger)
+            logging.debug("Executing environment trigger: {}".format(env_trigger))
+            self.game.execute_env_trigger(env_trigger)
 
     def process_condition(self, condition_type, condition):
         condition_type_mapping = { "hw_condition": self.process_hardware_condition}
@@ -174,6 +180,7 @@ class StepManager():
                 self.update_enabled_steps()
 
     def stress_test(self):
+        #Currently useless as non-enabled steps won't be executed so it's identical to the poll function - except without triggers and stuff
         logging.debug("Step manager - stress-testing...")
         for step in self.steps:
             step.complete_conditions_met(self.process_condition)

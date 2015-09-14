@@ -2,7 +2,9 @@ from __future__ import print_function
 import json
 from time import sleep
 
+import signal
 import pdb
+import os
 import sys
 import logging
 sys.excepthook = lambda *args: pdb.pm()
@@ -22,50 +24,52 @@ def read_config(filename):
     f.close()
     return config
 
-room_manager = None
-step_manager = None
-game_manager = None
-rpc_api = None
-game = None
+room_manager = RoomManager()
+game_manager = GameManager()
+step_manager = StepManager()
+rpc_api = RPCApi()
 
-room_config = {}
-scenario = []
-rpc_config = {}
+room_config = None
+game_config = None
+scenario = None
+rpc_config = None
 
 def read_configs():
-    global room_config, scenario, rpc_config
-    room_config = read_config('room_config.json')
+    global room_config, scenario, rpc_config, game_config
     scenario = read_config('scenarios/scenario_small.json')
+    room_config = read_config('room_config.json')
     rpc_config = read_config('rpc_api.json')
+    game_config = read_config('game_config.json')
 
-def init_managers():
-    global room_manager, step_manager, game_manager, rpc_api, game
-    room_manager = RoomManager(room_config)
-    room_manager.init_devices()
-    step_manager = StepManager(scenario, room_manager)
-    rpc_api = RPCApi(rpc_config, step_manager=step_manager, room_manager=room_manager)
-    game_manager = GameManager()
-    game = game_manager.start_game(game_length=60*60)
+def prepare_for_game():
+    room_manager.init_devices(room_config)
+    game_manager.init_game(game_config)
+    step_manager.init_steps(scenario, room_manager, game_manager)
+    rpc_api.init_api(rpc_config, step_manager=step_manager, room_manager=room_manager, game_manager=game_manager)
 
-def init():
-    read_configs()
-    init_managers()
+def exit(*args):
+    #Used for signal handling. As for now, just exits.
+    sys.exit(0)
 
-def test():
-    args = (0L, 0L, {})
-    try:
-        while True:
-            args = room_manager.stress_test(*args)
-    except KeyboardInterrupt:
-        print("Interrupting test - {} failed attempts out of {}".format(args[1], args[0]))
-        print(args[2])
-        sys.exit(0)
+for exit_signal in [signal.SIGTERM]:
+    signal.signal(exit_signal, exit)
 
 if __name__ == "__main__":
-    init()
-    test()
-    #while game.running:
-        #step_manager.stress_test()
-        #step_manager.poll()
-        #rpc_api.poll()
-        #sleep(0.1)
+    logging.info("PID is {}".format(os.getpid()))
+    while True: #Endless loop for the script. Guess you could even call it a state machine ;-)
+        #TODO: add persistence between script crashes
+        read_configs()
+        prepare_for_game() #Before every game starts, we do need to initialise objects
+        game = game_manager.game
+        if not game.running: #At the start, the game is not running. 
+            logging.info("Game not running yet")
+        while not game.running: #Until it is, we just poll the API to receive the game start signal
+            logging.debug("Game not running yet")
+            rpc_api.poll()
+            sleep(1)
+        logging.info("Game started.")
+        step_manager.game_started()
+        while game.running: #Now the game is started and we also need to poll steps
+            rpc_api.poll()
+            step_manager.poll()
+            sleep(0.1)

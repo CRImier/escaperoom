@@ -1,10 +1,10 @@
-from modbus_dev import ModbusDevice
+from modbus_dev import ModbusDevice, AnalogSensor, DigitalSensor
 
 import logging
 
 import pdb
 
-class KnobPanel(ModbusDevice):
+class KnobPanel(AnalogSensor):
 
     def __init__(self, modbus_id = 1, knob_count = 1, knob_registers = [3]):
         ModbusDevice.__init__(self) 
@@ -13,14 +13,10 @@ class KnobPanel(ModbusDevice):
         self.knob_registers = knob_registers
         self.test()
 
-    def get_knob_value(self, knob_register):
-        raw_data = self.request(knob_register)
-        return raw_data
-
     def get_knob_values(self):
         values = []
         for knob_index in range(self.knob_count):
-            values.append(self.get_knob_value(self.knob_registers[knob_index]))
+            values.append(self.get_register(self.knob_registers[knob_index]))
         return values
 
     def compare_knobs(self, *args, **kwargs):
@@ -33,7 +29,7 @@ class KnobPanel(ModbusDevice):
         return all(truth_table)
 
 
-class TemperatureSensor(ModbusDevice):
+class TemperatureSensor(AnalogSensor):
 
     def __init__(self, modbus_id=1, temperature_register=3, coefficient=1):
         ModbusDevice.__init__(self) 
@@ -42,13 +38,8 @@ class TemperatureSensor(ModbusDevice):
         self.coefficient = coefficient
         self.test()
 
-    def get_raw_data(self):
-        raw_data = self.request(self.temperature_register)
-        return raw_data
-        
     def get_temperature(self):
-        raw_data = self.get_raw_data()
-        #pdb.set_trace()
+        raw_data = self.get_register(self.temperature_register)
         temperature = raw_data*self.coefficient
         return temperature
 
@@ -57,7 +48,7 @@ class TemperatureSensor(ModbusDevice):
         return (current_temperature < (temperature + margin) and current_temperature > (temperature - margin))
 
 
-class PressureSensor(ModbusDevice):
+class PressureSensor(AnalogSensor):
 
     def __init__(self, modbus_id=1, pressure_register=3, coefficient=1):
         ModbusDevice.__init__(self) 
@@ -66,12 +57,8 @@ class PressureSensor(ModbusDevice):
         self.coefficient = coefficient
         self.test()
 
-    def get_raw_data(self):
-        raw_data = self.request(self.pressure_register)
-        return raw_data
-        
     def get_pressure(self):
-        raw_data = self.get_raw_data()
+        raw_data = self.get_register(self.pressure_register)
         temperature = raw_data*self.coefficient
         return temperature
 

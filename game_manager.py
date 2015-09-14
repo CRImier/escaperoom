@@ -52,13 +52,28 @@ class GameManager():
     def __init__(self):
         pass
 
-    def start_game(self, *args, **kwargs):
+    def init_game(self, config):
+        self.config = config
         self.game = Game()
+
+    def api_start_game(self, *args, **kwargs):
+        self.start_game(*args, **kwargs)
+
+    def api_stop_game(self):
+        self.stop_game()
+
+    def start_game(self, *args, **kwargs):
         self.game.start(*args, **kwargs)
-        return self.game #For easier game management
        
     def stop_game(self):
         self.game.stop()
 
     def make_sound(self, sound_filename):
         pass
+
+    def execute_env_trigger(self, trigger):
+        action = trigger["action"]
+        method = trigger["method"]
+        if action == "game":
+            if method == "end":
+                self.stop_game() 
