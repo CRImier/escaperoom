@@ -28,10 +28,10 @@ class ModbusDevice():
         except AttributeError:
             response = None
         if response == True or response == False:
-            #print "Sensor {} responded".format(self.modbus_id)
+            print "Sensor {} responded".format(self.modbus_id)
             return (True, self.modbus_id)
         else:
-            #print "Sensor {} didn't respond".format(self.modbus_id)
+            print "Sensor {} didn't respond".format(self.modbus_id)
             return (False, self.modbus_id)
 
     def request(self, register):
@@ -54,6 +54,9 @@ class ModbusDevice():
 
     def write(self, register, data):
         return self.client.write_register(register, data, unit=self.modbus_id)
+
+    def get_bit_from_data(self):
+        pass
 
 
 class AnalogSensor(ModbusDevice):

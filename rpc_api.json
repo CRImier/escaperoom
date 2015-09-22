@@ -4,7 +4,6 @@
     "timeout":0.1,
     "step_manager":
     [
-      {"name":"api_get_active_steps", "alias":"get_active_steps"},
       {"name":"api_finish_step_by_name", "alias":"finish_step"},
       {"name":"api_get_steps", "alias":"get_steps"}
     ],

@@ -48,5 +48,18 @@
        ],         
     "actuators":
        [
+         {"name":"door_2",
+          "desc":"Second door relay",
+          "class":"Modbus.DoorRelay",
+          "args":[],
+          "kwargs":
+           {
+            "modbus_id":14, 
+            "init_locked":true,
+            "lock_invert":true,
+            "register":1,
+            "bit":0
+           }
+         }
        ]
 }

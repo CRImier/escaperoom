@@ -46,8 +46,8 @@ class Step():
         logging.info("Step disabled: {}".format(self.name))
         self.enabled = False
 
-    def complete_conditions_met(self, condition_process_function):
-        if not self.enabled:
+    def complete_conditions_met(self, condition_process_function, check_override=False):
+        if not self.enabled and check_override != True:
             logging.warning("Bug: a check of step's conditions was attempted with step not enabled")
             return False
         if self.hw_conditions: 
@@ -157,16 +157,7 @@ class StepManager():
             attrs = ["name", "description", "steps_that_enable"]
             for attr in attrs:
                 step_description[attr] = getattr(step, attr)
-            response.append(step_description)
-        return response
-
-    def api_get_active_steps(self):
-        response = []
-        for step in self.enabled_steps:
-            step_description = {}
-            attrs = ["name", "description", "steps_that_enable"]
-            for attr in attrs:
-                step_description[attr] = getattr(step, attr)
+            step_description["enabled"] = step in self.enabled_step
             response.append(step_description)
         return response
 
@@ -179,8 +170,9 @@ class StepManager():
                 self.finish_step(step)
                 self.update_enabled_steps()
 
-    def stress_test(self):
-        #Currently useless as non-enabled steps won't be executed so it's identical to the poll function - except without triggers and stuff
+    def check_step_conditions(self):
+        results = []
         logging.debug("Step manager - stress-testing...")
         for step in self.steps:
-            step.complete_conditions_met(self.process_condition)
+            results.append(step.complete_conditions_met(self.process_condition, check_override=True))
+        return results

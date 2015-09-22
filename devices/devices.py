@@ -113,7 +113,66 @@ class DoorSensor(ModbusDevice):
         door_data = self.get_door_register()
         mask = 1 << self.bit
         return mask == mask & door_data
+
         
+class FloorSensor(ModbusDevice):
+
+    def __init__(self, modbus_id=1, button_register=3, bit=0):
+        ModbusDevice.__init__(self) 
+        self.modbus_id = modbus_id
+        self.button_register = button_register
+        self.bit = bit
+        self.test()
+
+    def get_button_register(self):
+        raw_data = self.request(self.button_register)
+        return raw_data
+
+    def was_pressed(self):
+        door_data = self.get_door_register()
+        mask = 1 << self.bit
+        return mask == mask & door_data
+
+        
+class ButtonPanel(ModbusDevice):
+
+    def __init__(self, modbus_id=1, button_register=3, bits=[0, 1, 2]):
+        ModbusDevice.__init__(self) 
+        self.modbus_id = modbus_id
+        self.button_register = button_register
+        self.bits = bits
+        self.test()
+
+    def get_button_states(self):
+        states = []
+        register = self.request(self.button_register)
+        for button_bit in self.bits:
+            states.append(mask == (1<<button_bit) & button_register)
+        return states
+        
+    def compare_state(self, *args):
+        return self.get_button_states == args
+
+
+class ShotSensor(ModbusDevice):
+
+    def __init__(self, modbus_id=1, sensor_register=3, bits=[0, 1, 2]):
+        ModbusDevice.__init__(self) 
+        self.modbus_id = modbus_id
+        self.sensor_register = sensor_register
+        self.bits = bits
+        self.test()
+
+    def get_sensor_states(self):
+        states = []
+        register = self.request(self.sensor_register)
+        for button_bit in self.bits:
+            states.append(mask == (1<<button_bit) & button_register)
+        return states
+        
+    def compare_state(self, *args):
+        return self.get_sensor_states == args
+
 
 class DoorRelay(ModbusDevice):
 

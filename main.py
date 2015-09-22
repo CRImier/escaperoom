@@ -36,7 +36,7 @@ rpc_config = None
 
 def read_configs():
     global room_config, scenario, rpc_config, game_config
-    scenario = read_config('scenarios/scenario_small.json')
+    scenario = read_config('../scenario_museum.json')
     room_config = read_config('room_config.json')
     rpc_config = read_config('rpc_api.json')
     game_config = read_config('game_config.json')
@@ -56,12 +56,13 @@ for exit_signal in [signal.SIGTERM]:
 
 if __name__ == "__main__":
     logging.info("PID is {}".format(os.getpid()))
+    print(room_manager.api_stress_test(5))
     while True: #Endless loop for the script. Guess you could even call it a state machine ;-)
         #TODO: add persistence between script crashes
         read_configs()
-        prepare_for_game() #Before every game starts, we do need to initialise objects
+        prepare_for_game() #Before every game starts, we need to initialise objects
         game = game_manager.game
-        if not game.running: #At the start, the game is not running. 
+        if not game.running: #At the start, the game usually is not running (might be changed when persistence functions get added). 
             logging.info("Game not running yet")
         while not game.running: #Until it is, we just poll the API to receive the game start signal
             logging.debug("Game not running yet")
@@ -72,4 +73,5 @@ if __name__ == "__main__":
         while game.running: #Now the game is started and we also need to poll steps
             rpc_api.poll()
             step_manager.poll()
+            game.print_time_left()
             sleep(0.1)

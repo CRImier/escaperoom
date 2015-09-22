@@ -1,3 +1,4 @@
+from __future__ import division
 import logging
 from subprocess import check_output
 from datetime import datetime
@@ -22,6 +23,15 @@ class Game():
 
     def update_displayed_time(self):
         pass #Need external trigger support, linking the game manager with devices available
+
+    def print_time_left(self):
+        print("Time left - {}:{}".format(*self.get_time_left()))
+
+    def get_time_left(self):
+        difference = datetime.now() - self.start_time
+        seconds_from_start = difference.total_seconds()
+        seconds_left = self.game_length - seconds_from_start
+        return (seconds_left/60, seconds_left%60) #Minutes and seconds till the game ends
 
     def decrease_time_left(self, amount):
         self.game_length -= amount
