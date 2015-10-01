@@ -31,7 +31,7 @@ class Game():
         difference = datetime.now() - self.start_time
         seconds_from_start = difference.total_seconds()
         seconds_left = self.game_length - seconds_from_start
-        return (seconds_left/60, seconds_left%60) #Minutes and seconds till the game ends
+        return (int(seconds_left/60), int(seconds_left%60)) #Minutes and seconds till the game ends
 
     def decrease_time_left(self, amount):
         self.game_length -= amount
