@@ -56,30 +56,69 @@ class ModbusDevice():
         return self.client.write_register(register, data, unit=self.modbus_id)
 
 
-class AnalogSensor(ModbusDevice):
+class BinarySensor(ModbusDevice):
 
-    def get_register(self, register):
-        raw_data = self.request(register)
-        return raw_data
-
-
-class DigitalSensor(ModbusDevice):
-
-    def __init__(self, modbus_id=1, door_register=3, bit=0):
-        ModbusDevice.__init__(self) 
-        self.modbus_id = modbus_id
-        self.door_register = door_register
-        self.bit = bit
-        self.test()
-
-    def get_door_register(self):
-        raw_data = self.request(self.door_register)
-        return raw_data
-
-    def door_opened(self):
-        door_data = self.get_door_register()
-        mask = 1 << self.bit
-        return mask == mask & door_data
+    def __init__(self, modbus_id = 1, bits = {1:[0, 1, 2]}):
+        ModbusDevice.__init__(self)
+        self.bits = bits
         
+    def get_bit_from_value(self, bit_num, value):
+        mask = 1 << bit_num
+        return mask == mask & value
 
+    def get_all_values(self, bits_dict):
+        #Bits are passed as an argument to make this function useful for child classes
+        values = []
+        for register in bits_dict.keys().sorted(): #In this case it is important to sort keys before they're iterated over because we want them to ne in order
+            #Going through every register defined
+            register_value = self.request(register)
+            for bit_num in bits_dict[register]: 
+                #Going through every bit for the given register
+                bit_value = self.get_bit_from_value(bit_num, register_value)
+                values.append(bit_value)
+        return values
 
+    def compare_values(self, *values, method_name="all"):
+        if len(values) != len(actual_values):
+            return None #TODO Exception will happen since arrays are compared against each other value by value using indices
+        current_values = self.get_all_values(self.bits) 
+        try:
+            method = eval(method_name) #Allows any(), all() as well as custom functions from child classes. Is vulnerable to attack but is that a valid attack vector?
+        except NameError: #Unknown method, what to do? TODO
+            return None
+        return method([current_value == values[index] for index, current_value in enumerate(current_values)])
+
+    def all_values(self, value=True):
+        actual_values = self.get_all_values(self.bits)
+        return all([element==value for element in actual_values])
+
+class RegisterSensor(ModbusDevice):
+
+    def __init__(self, modbus_id = 1, registers = [3]):
+        ModbusDevice.__init__(self)
+        self.modbus_id = modbus_id
+        self.registers = registers
+
+    def get_registers_values(self, reg_list):
+        #Registers are passed as an argument to make this function useful for child classes
+        values = []
+        for register in reg_list:
+            value = self.request(register)
+            values.append(value)
+        return values
+
+    def compare_function(self, current_value, expected_value, margin=margin):
+        if margin == 0:
+            return current_value == expected_value
+        else:
+            return (current_value < expected_value + margin and current_value > expected_value - margin)
+        
+    def compare_values(self, *values, margin = 0, method_name="all"):
+        if len(values) != len(self.registers):
+            return None #TODO Exception will happen since arrays are compared against each other value by value using indices
+        current_values = self.get_registers_values(self.registers)
+        try:
+            method = eval(method_name) #Allows any(), all() as well as custom functions from child classes.
+        except NameError: #Unknown method, what to do? TODO
+            return None
+        return method([self.compare_function(current_value, values[index], margin) for index, current_value in enumerate(current_values)])
