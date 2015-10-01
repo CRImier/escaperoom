@@ -37,7 +37,7 @@ rpc_config = None
 def read_configs():
     global room_config, scenario, rpc_config, game_config
     scenario = read_config('../scenario_museum.json')
-    room_config = read_config('room_config.json')
+    room_config = read_config('../museum_config.json')
     rpc_config = read_config('rpc_api.json')
     game_config = read_config('game_config.json')
 
