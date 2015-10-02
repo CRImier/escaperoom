@@ -18,13 +18,17 @@ class RoomManager():
         for sensor in self.config['sensors']:
             sensor_name = sensor['name']
             sensor_class = attrgetter(sensor['class'])(Devices)
-            sensor_object = sensor_class(*sensor['args'], **sensor['kwargs'])
+            args = sensor['args'] if "args" in sensor.keys() else []
+            kwargs = sensor['kwargs'] if "kwargs" in sensor.keys() else {}
+            sensor_object = sensor_class(*args, **kwargs)
             self.descriptions[sensor_name] = sensor['desc']
             self.devices[sensor_name] = sensor_object
         for actuator in self.config['actuators']:
             actuator_name = actuator['name']
             actuator_class = attrgetter(actuator['class'])(Devices)
-            actuator_object = actuator_class(*actuator['args'], **actuator['kwargs'])
+            args = actuator['args'] if "args" in actuator.keys() else []
+            kwargs = actuator['kwargs'] if "kwargs" in actuator.keys() else {}
+            actuator_object = actuator_class(*args, **kwargs)
             self.descriptions[actuator_name] = actuator['desc']
             self.devices[actuator_name] = actuator_object
 
