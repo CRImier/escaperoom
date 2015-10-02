@@ -40,7 +40,6 @@ class ModbusDevice():
         while response == None and counter <= self.comm_retries:
             response = self.client.read_holding_registers(register, 1, unit=self.modbus_id)
             if response == None or not hasattr(response, "getRegister"):
-                pdb.set_trace()
                 logging.warning("Try {} - didn't get any response from a slave device with ID {}, retrying...".format(counter, self.modbus_id))
                 counter += 1
                 continue
@@ -60,6 +59,12 @@ class BinarySensor(ModbusDevice):
 
     def __init__(self, modbus_id = 1, bits = {1:[0, 1, 2]}):
         ModbusDevice.__init__(self)
+        self.modbus_id = modbus_id
+        for reg_str in bits.keys(): #Workaround as we need registers to be integers but we get them as strings from JSON
+            reg_num = int(reg_str)
+            reg_bits = bits[reg_str]
+            bits.pop(reg_str) #Removing the key and value
+            bits[reg_num] = reg_bits #Restoring the contents
         self.bits = bits
         
     def get_bit_from_value(self, bit_num, value):
@@ -69,7 +74,7 @@ class BinarySensor(ModbusDevice):
     def get_all_values(self, bits_dict):
         #Bits are passed as an argument to make this function useful for child classes
         values = []
-        for register in bits_dict.keys().sorted(): #In this case it is important to sort keys before they're iterated over because we want them to ne in order
+        for register in sorted(bits_dict.keys()): #In this case it is important to sort keys before they're iterated over because we want them to ne in order
             #Going through every register defined
             register_value = self.request(register)
             for bit_num in bits_dict[register]: 
@@ -78,7 +83,8 @@ class BinarySensor(ModbusDevice):
                 values.append(bit_value)
         return values
 
-    def compare_values(self, *values, method_name="all"):
+    def compare_values(self, *values, **kwargs):
+        method_name = kwargs["method_name"] if "method_name" in kwargs.keys() else "all"
         if len(values) != len(actual_values):
             return None #TODO Exception will happen since arrays are compared against each other value by value using indices
         current_values = self.get_all_values(self.bits) 
@@ -107,18 +113,20 @@ class RegisterSensor(ModbusDevice):
             values.append(value)
         return values
 
-    def compare_function(self, current_value, expected_value, margin=margin):
+    def compare_function(self, current_value, expected_value, margin=0):
         if margin == 0:
             return current_value == expected_value
         else:
             return (current_value < expected_value + margin and current_value > expected_value - margin)
         
-    def compare_values(self, *values, margin = 0, method_name="all"):
+    def compare_values(self, *values, **kwargs):
+        method_name = kwargs["method_name"] if "method_name" in kwargs.keys() else "all"
+        margin = kwargs["margin"] if "margin" in kwargs.keys() else 0
         if len(values) != len(self.registers):
             return None #TODO Exception will happen since arrays are compared against each other value by value using indices
         current_values = self.get_registers_values(self.registers)
         try:
             method = eval(method_name) #Allows any(), all() as well as custom functions from child classes.
         except NameError: #Unknown method, what to do? TODO
-            return None
+            raise
         return method([self.compare_function(current_value, values[index], margin) for index, current_value in enumerate(current_values)])

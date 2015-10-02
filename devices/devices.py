@@ -1,5 +1,5 @@
 from modbus_dev import ModbusDevice, BinarySensor, RegisterSensor
-#Incidentally, BinarySensor and RegisterSensor seem to cover most of the sensors that are to be typically used
+#Incidentally, BinarySensor and RegisterSensor seem to cover most of the sensors that are typically used
 
 import logging
 import pdb
