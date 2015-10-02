@@ -1,5 +1,5 @@
 #include <ModbusRtu.h>
-#define ID   15
+#define ID   14
 Modbus slave(ID, 0, 10);
 
 const int sensor_ports[] = { A0, A1, A2 };

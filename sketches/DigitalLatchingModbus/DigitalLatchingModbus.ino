@@ -3,12 +3,11 @@
 Modbus slave(ID, 0, 10);
 
 
-const int digital_ports[] = { 11, 12, 13 };
+const int digital_ports[] = {11, 12, 13};
 
 #define num_digital sizeof(digital_ports)/sizeof(int)
 #define reg_count 6
 
-const bool digital_states[num_digital] = {2};
 uint16_t au16data[reg_count];
 uint16_t latch_register = 0;
 const int relay_pin = 4;

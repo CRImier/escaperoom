@@ -3,7 +3,7 @@
 Modbus slave(ID, 0, 10);
 
 
-const int analog_ports[] = { A0 };
+const int analog_ports[] = { A0, A1, A2 };
 
 #define num_analog sizeof(analog_ports)/sizeof(int)
 #define reg_count 3+num_analog+3
