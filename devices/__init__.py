@@ -13,3 +13,5 @@ for device_name in dir(devices):
         if issubclass(device, modbus_class) and device.__name__ != 'ModbusDevice':
             print "{} - {}".format(device_name, type(device))
             setattr(Devices.Modbus, device_name, device)
+
+interfaces = devices.interfaces
