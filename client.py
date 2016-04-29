@@ -1,5 +1,5 @@
 import jsonrpclib
-server = jsonrpclib.Server('http://localhost:8080')
+server = jsonrpclib.Server('http://localhost:8070')
 server.start_game()
 
 """actions = {

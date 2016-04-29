@@ -1,6 +1,6 @@
 {
     "host":"localhost",
-    "port":8080,
+    "port":8070,
     "timeout":0.1,
     "step_manager":
     [
