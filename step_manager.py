@@ -56,9 +56,7 @@ class Step():
         else:
             return True #TODO: as for now, only hardware conditions are supported, my employer hasn't needed any more
 
-    def finish(self):
-        pass            
-    
+
 class StepManager():
 
     def __init__(self):
