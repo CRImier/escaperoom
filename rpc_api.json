@@ -5,6 +5,7 @@
     "step_manager":
     [
       {"name":"api_finish_step_by_name", "alias":"finish_step"},
+      {"name":"api_enable_step_by_name", "alias":"enable_step"},
       {"name":"api_get_steps", "alias":"get_steps"}
     ],
     "game_manager":

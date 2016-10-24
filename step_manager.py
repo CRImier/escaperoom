@@ -111,12 +111,21 @@ class StepManager():
         step.disable()
         self.finished_steps.append(step)
 
-    def api_finish_step_by_name(self, name):
-        step = self.get_step_by_name(name)
-        return self.finish_step(step)
 
     def enable_step(self, step):
         step.enable()
+
+    def api_finish_step_by_name(self, name):
+        step = self.get_step_by_name(name)
+        result = self.finish_step(step)
+        self.update_enabled_steps()
+        return result
+
+    def api_enable_step_by_name(self, name):
+        step = self.get_step_by_name(name)
+        result = self.enable_step(step)
+        self.update_enabled_steps()
+        return result
 
     def execute_triggers(self, step):
         for hw_trigger in step.hw_triggers:
