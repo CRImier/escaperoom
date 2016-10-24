@@ -1,28 +1,32 @@
-from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+from pymodbus.client.sync import ModbusSerialClient, ModbusTcpClient, ModbusUdpClient
 from time import sleep
 import logging
 import sys
-logging.basicConfig(stream = sys.stdout, level=logging.INFO)
+import struct
 
 import pdb
 
-client = None
+logging.basicConfig(stream = sys.stdout, level=logging.INFO)
 
-def init_client():
-    global client
-    if client:
-        return
-    client = ModbusClient(method='rtu', port='/dev/ttyUSB0', stopbits = 1, bytesize = 8, parity = 'N', baudrate= 115200, timeout=0.1)
-    client.connect()
+interfaces = {
+"ModbusSerialClient":ModbusSerialClient,
+"ModbusTCPClient":ModbusTcpClient,
+"ModbusUDPClient":ModbusUdpClient
+}
 
 class ModbusDevice():
     comm_retries = 5
-    def __init__(self):
-        init_client()
-        self.client = client
+    def __init__(self, modbus_id, interface):
+        self.modbus_id = modbus_id
+        self.interface_name = interface.interface_name
+        self.client = interface
+        self.client.connect()
 
     def test(self):
-        response = self.client.read_coils(0, 1, unit=self.modbus_id)
+        try:
+            response = self.client.read_coils(0, 1, unit=self.modbus_id)
+        except struct.error:
+            response = None
         try:
             response = response.getBit(0)
         except AttributeError:
@@ -34,6 +38,10 @@ class ModbusDevice():
             #print "Sensor {} didn't respond".format(self.modbus_id)
             return (False, self.modbus_id)
 
+    def get_identifier(self):
+        identifier = "{}:{}".format(self.interface_name, self.modbus_id)
+        return identifier
+
     def request(self, register):
         counter = 0
         response = None
@@ -44,28 +52,61 @@ class ModbusDevice():
                 counter += 1
                 continue
             response = response.getRegister(0)
-            if response == None:
-                logging.warning("Try {} - didn't get any response from a slave device with ID {}, retrying...".format(counter, self.modbus_id))
+            if not isinstance(response, int):
+                logging.warning("Try {} - got an incorrect response from a slave device with ID {}, retrying...".format(counter, self.modbus_id))
                 counter += 1
                 continue
         logging.debug("Got the response successfully.")
         return response
 
     def write(self, register, data):
-        return self.client.write_register(register, data, unit=self.modbus_id)
+        counter = 0
+        response = None
+        while response == None and counter <= self.comm_retries:
+            response = self.client.write_register(register, data, unit=self.modbus_id)
+            if response == None:
+                logging.warning("Try {} - failed to write to a slave device with ID {}, retrying...".format(counter, self.modbus_id))
+                counter += 1
+                continue
+        logging.debug("Wrote to client successfully.")
+        return response
 
 
 class BinarySensor(ModbusDevice):
 
-    def __init__(self, modbus_id = 1, bits = {1:[0, 1, 2]}):
-        ModbusDevice.__init__(self)
-        self.modbus_id = modbus_id
+    def __init__(self, modbus_id = 1, bits = {1:[0, 1, 2]}, interface = None, defaults = None):
+        ModbusDevice.__init__(self, modbus_id, interface)
         for reg_str in bits.keys(): #Workaround as we need registers to be integers but we get them as strings from JSON
             reg_num = int(reg_str)
             reg_bits = bits[reg_str]
             bits.pop(reg_str) #Removing the key and value
             bits[reg_num] = reg_bits #Restoring the contents
         self.bits = bits
+        self.defaults = defaults
+
+    def reset(self):
+        #'self.bits' are already stored by reg_num:[bit_nums], not by str(reg_num):[bit_nums]
+        #For 'defaults', though, that's not the case.
+        if self.defaults:
+            logging.info("Resetting sensor {}".format(self.get_identifier()))
+            for reg_num in self.bits.keys():
+                register_value = self.request(reg_num)
+                values_to_set = self.defaults[str(reg_num)]
+                reg_bits = self.bits[reg_num]
+                logging.info("Register value before reset: {}".format(register_value))
+                for index, bit in enumerate(reg_bits):
+                    value_to_set = values_to_set[index]
+                    if value_to_set == 0:
+                        register_value = register_value & ~(1 << bit)
+                    elif value_to_set == 1:
+                        register_value = register_value | (1 << bit)
+                    else:
+                        logging.warning("Passed wrong value for setting bit :{}, needs to be either 0 or 1".format(value_to_set))
+                logging.info("Register value after reset: {}".format(register_value))
+                self.write(reg_num, register_value)
+                logging.info("Register value after reset: {}".format(self.request(reg_num)))
+        else:
+            logging.warning("Reset called on sensor {} where defaults are not set".format(self.get_identifier()))
         
     def get_bit_from_value(self, bit_num, value):
         mask = 1 << bit_num
@@ -74,7 +115,7 @@ class BinarySensor(ModbusDevice):
     def get_all_values(self, bits_dict):
         #Bits are passed as an argument to make this function useful for child classes
         values = []
-        for register in sorted(bits_dict.keys()): #In this case it is important to sort keys before they're iterated over because we want them to ne in order
+        for register in sorted(bits_dict.keys()): #In this case it is important to sort keys before they're iterated over because we want them to be in order
             #Going through every register defined
             register_value = self.request(register)
             for bit_num in bits_dict[register]: 
@@ -100,9 +141,8 @@ class BinarySensor(ModbusDevice):
 
 class RegisterSensor(ModbusDevice):
 
-    def __init__(self, modbus_id = 1, registers = [3]):
-        ModbusDevice.__init__(self)
-        self.modbus_id = modbus_id
+    def __init__(self, modbus_id = 1, interface = None, registers = [3]):
+        ModbusDevice.__init__(self, modbus_id, interface)
         self.registers = registers
 
     def get_registers_values(self, reg_list):
@@ -129,4 +169,20 @@ class RegisterSensor(ModbusDevice):
             method = eval(method_name) #Allows any(), all() as well as custom functions from child classes.
         except NameError: #Unknown method, what to do? TODO
             raise
+        print("{} - {}".format(str(current_values), str(values)))
         return method([self.compare_function(current_value, values[index], margin) for index, current_value in enumerate(current_values)])
+
+class BinarySensorWithTCP(BinarySensor):
+
+    def __init__(self, *args, **kwargs):
+        interfaces = kwargs["interfaces"]
+        self.tcp_interface = interfaces[1]
+        kwargs.pop("interfaces")
+        kwargs['interface'] = interfaces[0]
+        BinarySensor.__init__(self, *args, **kwargs)
+
+    def request(self, register):
+        response = BinarySensor.request(self, register)
+        self.tcp_interface.tralala(register, response)
+        return response
+
