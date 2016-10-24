@@ -73,3 +73,11 @@ class RoomManager():
         args = trigger["args"] if 'args' in trigger.keys() else []
         kwargs = trigger["kwargs"] if 'kwargs' in trigger.keys() else {}
         return method(*args, **kwargs) #I honestly don't know if I need a return statement.
+
+    def reset_device_for_trigger(self, trigger):
+        actuator_name = trigger["actuator"]
+        actuator = self.devices[actuator_name]
+        try:
+            actuator.reset()
+        except AttributeError:
+            logging.warning("Tried to reset device {} with no reset method available".format(actuator_name))
