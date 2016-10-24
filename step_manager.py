@@ -173,11 +173,15 @@ class StepManager():
     def poll(self):
         logging.debug("Step manager - polling...")
         for step in self.enabled_steps:
-            if step.complete_conditions_met(self.process_condition):
-                logging.info("Step has been completed: {}".format(step.name))
-                self.execute_triggers(step)
-                self.finish_step(step)
-                self.update_enabled_steps()
+            try:
+                step_complete = step.complete_conditions_met(self.process_condition)
+            except Exception as e:
+                logging.warning("Step {} has encountered problems while checking conditions".format(step.name))
+                logging.warning(e)
+            else:
+                if step_complete:
+                    logging.info("Step has been completed: {}".format(step.name))
+                    self.finish_step(step)
 
     def check_step_conditions(self):
         results = []
