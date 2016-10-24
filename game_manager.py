@@ -28,6 +28,8 @@ class Game():
         print("Time left - {}:{}".format(*self.get_time_left()))
 
     def get_time_left(self):
+        if not self.running:
+            return (0, 0)
         difference = datetime.now() - self.start_time
         seconds_from_start = difference.total_seconds()
         seconds_left = self.game_length - seconds_from_start
@@ -72,6 +74,14 @@ class GameManager():
     def api_stop_game(self):
         self.stop_game()
 
+    def api_get_time_left(self):
+        if not self.game:
+            return (0, 0) #Look, an owl!
+        return self.game.get_time_left()
+
+    def api_get_game_state(self):
+        return self.game.running
+
     def start_game(self, *args, **kwargs):
         self.game.start(*args, **kwargs)
        
@@ -87,3 +97,6 @@ class GameManager():
         if action == "game":
             if method == "end":
                 self.stop_game() 
+            elif method == "decrease_time":
+                amount = trigger["amount"]
+                self.game.decrease_time_left(amount) 

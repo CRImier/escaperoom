@@ -10,7 +10,9 @@
     "game_manager":
     [
       {"name":"api_start_game", "alias":"start_game"},
-      {"name":"api_stop_game", "alias":"stop_game"}
+      {"name":"api_stop_game", "alias":"stop_game"},
+      {"name":"api_get_time_left", "alias":"get_time_left"},
+      {"name":"api_get_game_state", "alias":"get_game_state"}
     ],
     "room_manager":
     [
