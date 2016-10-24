@@ -1,12 +1,14 @@
 from operator import attrgetter
 
-from devices import Devices
+from devices import Devices, interfaces
 
 import logging
 
 
 class RoomManager():
+    
     config = {}
+    interface_storage = {}
     devices = {}
     descriptions = {}
 
@@ -15,11 +17,29 @@ class RoomManager():
 
     def init_devices(self, config):
         self.config = config
+        self.default_interface = config['default_interface']
+        for entry in config['interfaces']:
+            interface = {}
+            interface_name = entry['name']
+            interface_class_name = entry['class']
+            interface_class = interfaces[interface_class_name]
+            args = entry['args'] if 'args' in entry.keys() else []
+            kwargs = entry['kwargs'] if 'kwargs' in entry.keys() else {}
+            interface_object = interface_class(*args, **kwargs)
+            interface_object.interface_name = interface_name
+            self.interface_storage[interface_name] = interface_object
         for sensor in self.config['sensors']:
             sensor_name = sensor['name']
             sensor_class = attrgetter(sensor['class'])(Devices)
             args = sensor['args'] if "args" in sensor.keys() else []
             kwargs = sensor['kwargs'] if "kwargs" in sensor.keys() else {}
+            if "interfaces" in kwargs: 
+                sensor_interfaces = [self.interface_storage[name] for name in kwargs["interfaces"]]
+                kwargs['interfaces'] = sensor_interfaces
+            else:
+                interface_name = kwargs['interface'] if 'interface' in kwargs else self.default_interface
+                sensor_interface = self.interface_storage[interface_name]
+                kwargs['interface'] = sensor_interface
             sensor_object = sensor_class(*args, **kwargs)
             self.descriptions[sensor_name] = sensor['desc']
             self.devices[sensor_name] = sensor_object
@@ -28,6 +48,9 @@ class RoomManager():
             actuator_class = attrgetter(actuator['class'])(Devices)
             args = actuator['args'] if "args" in actuator.keys() else []
             kwargs = actuator['kwargs'] if "kwargs" in actuator.keys() else {}
+            interface_name = kwargs['interface'] if 'interface' in kwargs else self.default_interface
+            sensor_interface = self.interface_storage[interface_name]
+            kwargs['interface'] = sensor_interface
             actuator_object = actuator_class(*args, **kwargs)
             self.descriptions[actuator_name] = actuator['desc']
             self.devices[actuator_name] = actuator_object
@@ -58,8 +81,14 @@ class RoomManager():
     def get_description(self, device_name):
         return self.descriptions[device_name]
     
-    def api_get_device_descriptions(self, *names):
-        return [self.get_description(name) for name in names]
+    def api_get_device_descriptions(self):
+        descriptions = []
+        for name in self.devices.keys():
+            dev_desc = {'name':name, 'description':'', 'id':''}
+            dev_desc['description'] = self.get_description(name)
+            dev_desc['id'] = self.devices[name].modbus_id #TODO: modify when other types of devices get incorporated
+            descriptions.append(dev_desc)
+        return descriptions
 
     def execute_hw_trigger(self, trigger):
         actuator_name = trigger["actuator"]
