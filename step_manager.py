@@ -1,6 +1,7 @@
 import sys
 import json
 
+import datetime
 import logging
 logging.basicConfig(stream = sys.stdout, level=logging.DEBUG)
 
@@ -31,12 +32,21 @@ class Step():
             sys.exit(2)
         self.enable_on_start = True if 'start' in self.steps_that_enable else False
         #Optional config entries:
-        optional_entries = ['hw_conditions', 'hw_triggers', 'env_triggers'] 
+        optional_entries = ['hw_conditions', 'hw_triggers', 'env_triggers', 'options', 'time_to_reset'] 
         #Hardware conditions - external conditions to happen for the step to be completed
         #Hardware triggers - external actions that are executed once the step is completed
         #Environment triggers - actions that influence global game variables, such as room overall state (lighting, sounds, etc.), time left or game status
         for entry in optional_entries:
             setattr(self, entry, config[entry] if entry in config.keys() else [] ) #If the entry is not set, we'll set it to empty list to avoid KeyErrors 
+        possible_options = {"non_stop":False, "resettable":False} #option_name:default_value
+        #First, writing all the default option values
+        for option_name in possible_options.keys():
+            setattr(self, option_name, possible_options[option_name])
+        #Then, overwriting options if they're provided
+        if 'options' in config: 
+            for option_name in config['options']: #As for now, any option mentioned is set to True
+                #If this is a bad thing, let me know or send a pull request and we can work it out
+                setattr(self, option_name, True)
 
     def enable(self):
         logging.info("Step enabled: {}".format(self.name))
@@ -66,7 +76,8 @@ class StepManager():
         self.config = config
         self.steps = []
         self.enabled_steps = []
-        self.finished_steps = [] #Check if needed
+        self.finished_steps = [] 
+        self.steps_to_reset = []
         self.room = room_manager
         self.game = game_manager
         for step_config in self.config:
@@ -108,9 +119,46 @@ class StepManager():
         step.disable()
 
     def finish_step(self, step):
-        step.disable()
-        self.finished_steps.append(step)
+        if step.non_stop:
+            self.execute_triggers(step)
+        elif step.resettable:
+            self.execute_triggers(step)
+            self.finished_steps.append(step)
+            self.add_step_to_reset(step)
+            step.disable()
+        else:
+            self.execute_triggers(step)
+            self.finished_steps.append(step)
+            step.disable()
+        self.update_enabled_steps()
 
+    def add_step_to_reset(self, step):
+        logging.info("Marking step {} to be reset...".format(step.name))
+        time_added = datetime.datetime.now()
+        time_before_reset = step.time_to_reset
+        if time_before_reset == []:
+            logging.warning("Trying to mark step {} as to be reset without time to reset given".format(step.name))
+        else:
+            step.time_to_enable = time_added + datetime.timedelta(seconds = time_before_reset)
+            logging.info("Step will be re-enabled at {}".format(step.time_to_enable))
+            self.steps_to_reset.append(step)
+
+    def poll_steps_to_reset(self):
+        for step in self.steps_to_reset[:]:
+            if datetime.now() >= step.time_to_enable:
+                self.reset_step_devices(step)
+                self.enable_step(step)
+                self.steps_to_reset.remove(step)
+                if step in self.finished_steps():
+                    self.finished_steps.remove(step)
+                self.update_enabled_steps()
+
+    def reset_step_devices(self, step):
+        if step.hasattr('hw_conditions'):
+            for trigger in step.hw_conditions:
+                self.room.reset_devices_for_trigger(trigger)
+        else:
+            logging.warning("Tried to reset a step {} with no hardware conditions".format(step_name))
 
     def enable_step(self, step):
         step.enable()
@@ -172,6 +220,7 @@ class StepManager():
 
     def poll(self):
         logging.debug("Step manager - polling...")
+        self.poll_steps_to_reset()
         for step in self.enabled_steps:
             try:
                 step_complete = step.complete_conditions_met(self.process_condition)
