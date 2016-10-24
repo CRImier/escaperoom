@@ -1,0 +1,171 @@
+[
+    {
+        "name":"button_panel",
+        "description":"When buttons are pressed in the correct order, the door to the shaft shall open",
+        "steps_that_enable":["start"],
+        "hw_conditions":
+        [
+            {"sensor":"entrance_button_panel", "method":"compare_values", "args":[4, 7, 6]}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"shaft_entrance_door", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"buttons_in_shaft",
+        "description":"When all buttons in the shaft are pressed at the same time, the shaft exit door opens",
+        "steps_that_enable":["button_panel"],
+        "hw_conditions":
+        [
+            {"sensor":"shaft_buttons", "method":"all_values"}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"shaft_exit_door", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"panel_decreasing_time",
+        "description":"If the vibration-sensitive panel is touched, game time is decreased",
+        "steps_that_enable":["buttons_in_shaft"],
+        "hw_conditions":
+        [
+            {"sensor":"sensitive_floor", "method":"all_values"}
+        ],
+        "env_triggers":
+        [
+            {"action":"game", "method":"decrease_time", "amount":180}
+        ]
+    },
+    {
+        "name":"hatch_cutting",
+        "description":"When 4 points on corners of the hatch are shined upon with a laser, the said hatch opens",
+        "steps_that_enable":["buttons_in_shaft"],
+        "hw_conditions":
+        [
+            {"sensor":"mannequin_hatch", "method":"all_values"}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"hatch_door", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"mannequin_shooting",
+        "description":"When the mannequin is shot in 3 points, door to the security room opens",
+        "steps_that_enable":["hatch_cutting"],
+        "hw_conditions":
+        [
+            {"sensor":"mannequin", "method":"all_values"}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"security_entrance", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"folders_on_shelf",
+        "description":"When 2 folders are put on the shelf, shelf door opens",
+        "steps_that_enable":["mannequin_shooting"],
+        "hw_conditions":
+        [
+            {"sensor":"folder_shelf", "method":"compare_values","args":[25, 25], "kwargs":{"margin":25}}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"folder_shelf_door", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"coffee_cup",
+        "description":"When the cup is put on the coffee machine, the coffee machine table door opens",
+        "steps_that_enable":["mannequin_shooting"],
+        "hw_conditions":
+        [
+            {"sensor":"coffee_machine", "method":"all_values"}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"coffee_shelf_door", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"car_button_pressing",
+        "description":"When you press 3 buttons with a RC car, the door to the museum opens",
+        "steps_that_enable":["mannequin_shooting"],
+        "hw_conditions":
+        [
+            {"sensor":"car_buttons", "method":"all_values"}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"security_exit", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"painting_prices",
+        "description":"When the paintings are put according to their values, the door in left postament is opened",
+        "steps_that_enable":["car_button_pressing"],
+        "hw_conditions":
+        [
+            {"sensor":"rfid_paintings", "method":"compare_values", "args":[22553, 1697, 29181, 22095, 46668, 8108]}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"left_postament_door", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"labyrinth",
+        "description":"When the labyrinth is completed, the right postament door is unlocked",
+        "steps_that_enable":["car_button_pressing"],
+        "hw_conditions":
+        [
+            {"sensor":"labyrinth", "method":"all_values"}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"right_postament_door", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"statues",
+        "description":"When statues are put on the central postament, wire panel hatch will open",
+        "steps_that_enable":["car_button_pressing"],
+        "hw_conditions":
+        [
+            {"sensor":"rfid_paintings", "method":"compare_values", "args":[22553, 1697, 29181, 22095]}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"wire_board_door", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"connect_wires",
+        "description":"When all wires are connected in the right way, the diamond rises up",
+        "steps_that_enable":["statues"],
+        "hw_conditions":
+        [
+            {"sensor":"wire_panel", "method":"all_values"}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"diamond_motor", "method":"unlock"}
+        ]
+    },
+    {
+        "name":"inserting_circuits",
+        "description":"When circuits are inserted in the right slots, the door will open",
+        "steps_that_enable":["connect_wires"],
+        "hw_conditions":
+        [
+            {"sensor":"circuit_panel", "method":"compare_values", "args":[1023, 1023, 1023, 1023, 1023, 1023, 1023, 1023]}
+        ],
+        "hw_triggers":
+        [
+            {"actuator":"exit_door", "method":"unlock"}
+        ]
+    }
+]

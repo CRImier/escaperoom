@@ -1,0 +1,80 @@
+Traceback (most recent call last):
+  File "main.py", line 62, in <module>
+    prepare_for_game() #Before every game starts, we need to initialise objects
+  File "main.py", line 45, in prepare_for_game
+    room_manager.init_devices(room_config)
+  File "/home/pi/escaperoom/room_manager.py", line 21, in init_devices
+    sensor_object = sensor_class(*sensor['args'], **sensor['kwargs'])
+TypeError: __init__() got an unexpected keyword argument 'bits'
+
+
+  File "main.py", line 75, in <module>                                       
+    step_manager.poll()                                                      
+  File "/home/pi/escaperoom/step_manager.py", line 167, in poll              
+    if step.complete_conditions_met(self.process_condition):                 
+  File "/home/pi/escaperoom/step_manager.py", line 55, in complete_conditions
+_met                                                                         
+    return all(condition_process_function('hw_condition', condition) for cond
+ition in self.hw_conditions)                                                 
+  File "/home/pi/escaperoom/step_manager.py", line 55, in <genexpr>          
+    return all(condition_process_function('hw_condition', condition) for cond
+ition in self.hw_conditions)                                                 
+  File "/home/pi/escaperoom/step_manager.py", line 133, in process_condition 
+    return cpf(condition)                                                    
+  File "/home/pi/escaperoom/step_manager.py", line 146, in process_hardware_c
+ondition                                                                     
+    return method(*args, **kwargs)                                           
+  File "/home/pi/escaperoom/devices/devices.py", line 180, in compare_state  
+    return self.get_button_states() == args                                  
+  File "/home/pi/escaperoom/devices/devices.py", line 176, in get_button_stat
+es                                                                           
+    states.append(register == (1<<bit) & register)                           
+TypeError: unsupported operand type(s) for &: 'int' and 'NoneType'           
+
+Traceback (most recent call last):
+  File "main.py", line 66, in <module>
+    print(room_manager.api_stress_test(5))
+  File "/home/pi/escaperoom/room_manager.py", line 55, in api_stress_test
+    args = self.stress_test(*args)
+  File "/home/pi/escaperoom/room_manager.py", line 40, in stress_test
+    result = device.test()
+  File "/home/pi/escaperoom/devices/modbus_dev.py", line 25, in test
+    response = self.client.read_coils(0, 1, unit=self.modbus_id)
+  File "/usr/local/lib/python2.7/dist-packages/pymodbus/client/common.py", lin
+e 43, in read_coils
+    return self.execute(request)
+  File "/usr/local/lib/python2.7/dist-packages/pymodbus/client/sync.py", line 
+83, in execute
+    return self.transaction.execute(request)
+  File "/usr/local/lib/python2.7/dist-packages/pymodbus/transaction.py", line 
+64, in execute
+    result = self.client._recv(1024)
+  File "/usr/local/lib/python2.7/dist-packages/pymodbus/client/sync.py", line 
+354, in _recv
+    return self.socket.read(size)
+  File "/usr/local/lib/python2.7/dist-packages/serial/serialposix.py", line 47
+5, in read
+    raise SerialException('device reports readiness to read but returned no da
+ta (device disconnected or multiple access on port?)')
+serial.serialutil.SerialException: device reports readiness to read but return
+ed no data (device disconnected or multiple access on port?)
+
+    return all(condition_process_function('hw_condition', condition) for condi
+tion in self.hw_conditions)
+  File "/home/pi/escaperoom/step_manager.py", line 55, in <genexpr>
+    return all(condition_process_function('hw_condition', condition) for condi
+tion in self.hw_conditions)
+  File "/home/pi/escaperoom/step_manager.py", line 133, in process_condition
+    return cpf(condition)
+  File "/home/pi/escaperoom/step_manager.py", line 146, in process_hardware_co
+ndition
+    return method(*args, **kwargs)
+  File "/home/pi/escaperoom/devices/modbus_dev.py", line 98, in all_values
+    actual_values = self.get_all_values(self.bits)
+  File "/home/pi/escaperoom/devices/modbus_dev.py", line 82, in get_all_values
+    bit_value = self.get_bit_from_value(bit_num, register_value)
+  File "/home/pi/escaperoom/devices/modbus_dev.py", line 72, in get_bit_from_v
+alue
+    return mask == mask & value
+TypeError: unsupported operand type(s) for &: 'int' and 'NoneType'
+
