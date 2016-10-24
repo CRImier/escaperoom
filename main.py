@@ -2,6 +2,8 @@ from __future__ import print_function
 import json
 from time import sleep
 
+import threading
+
 import signal
 import pdb
 import os
@@ -61,17 +63,25 @@ if __name__ == "__main__":
         read_configs()
         prepare_for_game() #Before every game starts, we need to initialise objects
         game = game_manager.game
+        print(room_manager.get_identifiers())
         if not game.running: #At the start, the game usually is not running (might be changed when persistence functions get added). 
             logging.info("Game not running yet")
-            print(room_manager.api_stress_test(5))
+        rpc_api.start_thread()
+        """        for device in room_manager.devices.values():
+            #pdb.set_trace()
+            if 'reset' in dir(device):
+                try:
+                    device.reset()
+                except Exception as e:
+                    logging.warning("Exception while resetting device: {}".format(e))"""
         while not game.running: #Until it is, we just poll the API to receive the game start signal
+            print(room_manager.api_stress_test(1))
+            #rpc_api.poll()
             logging.debug("Game not running yet")
-            rpc_api.poll()
-            sleep(1)
         logging.info("Game started.")
         step_manager.game_started()
         while game.running: #Now the game is started and we also need to poll steps
-            rpc_api.poll()
+            #rpc_api.poll()
             step_manager.poll()
             game.print_time_left()
             sleep(0.1)
