@@ -75,6 +75,7 @@ class StepManager():
                 logging.debug("Enabling step...")
                 self.enable_step(step)
             self.steps.append(step)
+        self.update_enabled_steps()
 
     def game_started(self):
         self.update_enabled_steps()        
