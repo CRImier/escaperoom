@@ -56,15 +56,25 @@ class RoomManager():
             self.devices[actuator_name] = actuator_object
 
     def stress_test(self, total_count=0, bad_count=0, error_count={}):
+        used_ids = []
         for device in self.devices.values():
-            if device.modbus_id not in error_count.keys():
-                error_count[device.modbus_id] = 0
-            total_count += 1
-            result = device.test()
-            if not result[0]:
-                bad_count += 1
-                error_count[result[1]] += 1
+            identifier = device.get_identifier()
+            if identifier not in used_ids:
+                if device.modbus_id not in error_count.keys():
+                    error_count[device.modbus_id] = 0
+                total_count += 1
+                result = device.test()
+                if not result[0]:
+                    bad_count += 1
+                    error_count[result[1]] += 1
+                used_ids.append(identifier)
         return total_count, bad_count, error_count
+
+    def get_identifiers(self):
+        identifiers = {}
+        for device_name, device in self.devices.iteritems():
+            identifiers[device_name] = device.get_identifier()
+        return identifiers
 
     def api_test_devices(self):
         response = {}
