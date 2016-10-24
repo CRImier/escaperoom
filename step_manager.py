@@ -165,7 +165,8 @@ class StepManager():
             attrs = ["name", "description", "steps_that_enable"]
             for attr in attrs:
                 step_description[attr] = getattr(step, attr)
-            step_description["enabled"] = step in self.enabled_step
+            step_description["enabled"] = step in self.enabled_steps
+            step_description["finished"] = step in self.finished_steps
             response.append(step_description)
         return response
 
